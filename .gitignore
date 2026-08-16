@@ -26,3 +26,8 @@ replay_pid*
 .gradle/
 build/
 *.class
+
+# Local development files
+native/build/
+backup/
+*.save

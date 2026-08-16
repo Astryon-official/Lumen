@@ -1,13 +1,14 @@
 package com.astryon.lte.mixin;
 
 import com.astryon.lte.terrain.TerrainAnalyzer;
+import com.astryon.lte.chunk.ChunkQueue;
+import com.astryon.lte.chunk.CompletedChunkCache;
 
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.blending.Blender;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,13 +31,31 @@ public class NoiseBasedChunkGeneratorMixin {
             CallbackInfo ci
     ) {
 
+        int x = chunk.getPos().x();
+        int z = chunk.getPos().z();
+
+
+        if (CompletedChunkCache.isCompleted(x, z)) {
+
+            System.out.println(
+                "[LTE] Skipping completed chunk: "
+                + x + ", " + z
+            );
+
+            return;
+        }
+
+
         System.out.println(
             "[LTE] REAL TERRAIN HOOK AFTER SURFACE: "
-            + chunk.getPos().x()
-            + ", "
-            + chunk.getPos().z()
+            + x + ", " + z
         );
 
-	TerrainAnalyzer.analyze(chunk);
+
+        TerrainAnalyzer.analyze(chunk);
+
+
+        ChunkQueue.addChunk(x, z);
+
     }
 }

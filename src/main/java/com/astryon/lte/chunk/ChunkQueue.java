@@ -10,29 +10,38 @@ public class ChunkQueue {
     private static final int MAX_QUEUE_SIZE = 512;
 
 
-    public static void addChunk(int chunkX, int chunkZ) {
+public static void addChunk(int chunkX, int chunkZ) {
 
-        if (queuedChunks.size() >= MAX_QUEUE_SIZE) {
+    if (ProcessingChunkCache.contains(chunkX, chunkZ)
+            || CompletedChunkCache.isCompleted(chunkX, chunkZ)) {
 
-            System.out.println("[LTE] Queue limit reached. Skipping chunk: "
-                    + chunkX + ", " + chunkZ);
+        System.out.println(
+            "[LTE] Skipping duplicate chunk: "
+            + chunkX + ", "
+            + chunkZ
+        );
 
-            return;
-
-        }
-
-
-        ChunkTask task = new ChunkTask(chunkX, chunkZ);
-
-
-        queuedChunks.add(task);
-
-
-        System.out.println("[LTE] Added chunk to queue: "
-                + chunkX + ", " + chunkZ);
+        return;
 
     }
 
+
+    ChunkTask task = new ChunkTask(chunkX, chunkZ);
+
+
+    ProcessingChunkCache.add(chunkX, chunkZ);
+
+
+    queuedChunks.add(task);
+
+
+    System.out.println(
+        "[LTE] Added chunk to queue: "
+        + chunkX + ", "
+        + chunkZ
+    );
+
+}
 
     public static ChunkTask getNextChunk() {
 

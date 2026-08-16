@@ -1,6 +1,6 @@
 #include "HardwareManager.h"
+#include "OpenCLManager.h"
 #include "Logger.h"
-#include "VulkanDetector.h"
 
 #include <thread>
 #include <fstream>
@@ -51,23 +51,19 @@ bool HardwareManager::Initialize()
 
     // GPU detection
 
-    DetectVulkanGPUs(gpus);
+Log("Detecting OpenCL GPUs...");
 
+GPUInfo gpu;
 
-    if(gpus.empty())
-    {
-        Log("No Vulkan GPUs found");
-    }
-    else
-    {
-        Log("Vulkan GPU detection complete");
-    }
+gpu.name = OpenCLManager::GetDeviceName();
+gpu.vulkanSupported = false;
 
+gpus.push_back(gpu);
+
+Log("OpenCL GPU detection complete");
 
     return true;
 }
-
-
 
 const CPUInfo& HardwareManager::GetCPU() const
 {

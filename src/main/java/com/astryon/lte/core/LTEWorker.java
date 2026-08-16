@@ -4,32 +4,50 @@ import com.astryon.lte.chunk.ChunkProcessor;
 
 public class LTEWorker extends Thread {
 
-    private volatile boolean running = true;
+    private boolean running = true;
+
 
     public LTEWorker() {
+
         super("LTE-Worker");
+
     }
+
 
     @Override
     public void run() {
 
-        System.out.println("[LTE] Worker thread started.");
+        System.out.println("[LTE] Worker started");
+
 
         while (running) {
 
-            ChunkProcessor.process();
-
             try {
-                Thread.sleep(50); // About 20 times per second
-            } catch (InterruptedException e) {
-                interrupt();
+
+                ChunkProcessor.process();
+
+
+                Thread.sleep(10);
+
+
+            } catch (Exception e) {
+
+                System.out.println(
+                    "[LTE] Worker error: "
+                    + e.getMessage()
+                );
+
             }
+
         }
 
-        System.out.println("[LTE] Worker thread stopped.");
     }
 
+
     public void shutdown() {
+
         running = false;
+
     }
+
 }

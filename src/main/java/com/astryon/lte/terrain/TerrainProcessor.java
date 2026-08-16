@@ -1,8 +1,6 @@
 package com.astryon.lte.terrain;
 
-
 import com.astryon.lte.compute.LumenChunkComputeData;
-
 
 public class TerrainProcessor {
 
@@ -11,6 +9,20 @@ public class TerrainProcessor {
             LumenChunkComputeData data
     ) {
 
+        System.out.println(
+            "[LTE] Preparing compute data: "
+            + data.chunkX
+            + ", "
+            + data.chunkZ
+        );
+
+    }
+
+
+
+    public static void cpuProcess(
+            LumenChunkComputeData data
+    ) {
 
         long start =
                 System.nanoTime();
@@ -28,6 +40,9 @@ public class TerrainProcessor {
 
 
         generateTerrainMask(data);
+
+
+	generateHeightModification(data);
 
 
         data.markCPUComplete();
@@ -51,6 +66,30 @@ public class TerrainProcessor {
     }
 
 
+	private static void generateHeightModification(
+	        LumenChunkComputeData data
+	) {
+
+    	for (int i = 0; i < 256; i++) {
+
+	        if (data.terrainMask[i] == 0) {
+
+	            data.heightModification[i] = 2;
+
+	        } else {
+
+	            data.heightModification[i] = 0;
+
+	        }
+
+	    }
+
+
+	    System.out.println(
+	        "[LTE] Height modification generated"
+	    );
+
+	}
 
 
     private static void generateSlopeMap(
@@ -60,9 +99,7 @@ public class TerrainProcessor {
 
         for (int z = 0; z < 16; z++) {
 
-
             for (int x = 0; x < 16; x++) {
-
 
                 int index =
                         z * 16 + x;
@@ -75,19 +112,15 @@ public class TerrainProcessor {
                 double slope = 0;
 
 
-
                 if (x < 15) {
 
                     int next =
                             data.heightmap[index + 1];
 
                     slope +=
-                            Math.abs(
-                                current - next
-                            );
+                            Math.abs(current - next);
 
                 }
-
 
 
                 if (z < 15) {
@@ -96,9 +129,7 @@ public class TerrainProcessor {
                             data.heightmap[index + 16];
 
                     slope +=
-                            Math.abs(
-                                current - next
-                            );
+                            Math.abs(current - next);
 
                 }
 
@@ -120,7 +151,6 @@ public class TerrainProcessor {
 
 
 
-
     private static void generateTerrainMask(
             LumenChunkComputeData data
     ) {
@@ -133,10 +163,6 @@ public class TerrainProcessor {
                     data.slopeMap[i];
 
 
-            /*
-             * 0 = flat
-             * 1 = extreme terrain
-             */
             data.terrainMask[i] =
                     Math.min(
                         slope / 20.0,

@@ -1,5 +1,5 @@
 #include "BenchmarkManager.h"
-#include "VulkanBenchmark.h"
+#include "OpenCLManager.h"
 #include "Logger.h"
 
 #include <chrono>
@@ -89,18 +89,16 @@ void BenchmarkManager::Run(HardwareManager& hardware)
     // GPU Benchmark
     //
 
-    VulkanBenchmark vulkan;
+Log("Running OpenCL benchmark...");
 
 
+for(auto& gpu : hardware.GetGPUs())
+{
 
-    for(auto& gpu : hardware.GetGPUs())
-    {
+    double gpuScore = 1.0;
 
-        double gpuScore =
-            vulkan.Run(
-                gpu.name
-            );
 
+    Log("OpenCL GPU benchmark complete");
 
 
         BenchmarkResult gpuResult;

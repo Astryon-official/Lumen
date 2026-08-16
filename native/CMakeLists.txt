@@ -5,7 +5,8 @@ project(LumenTerrainEngine)
 set(CMAKE_CXX_STANDARD 20)
 
 
-find_package(Vulkan REQUIRED)
+find_package(OpenCL REQUIRED)
+
 
 find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
@@ -19,13 +20,11 @@ add_library(LumenTerrainEngine SHARED
     src/LTE.cpp
     src/Logger.cpp
     src/HardwareManager.cpp
-    src/VulkanDetector.cpp
     src/BenchmarkManager.cpp
-    src/VulkanBenchmark.cpp
     src/LTENative.cpp
-
+    src/OpenCLManager.cpp
+    src/OpenCLCompute.cpp
 )
-
 
 target_include_directories(
     LumenTerrainEngine
@@ -33,10 +32,9 @@ target_include_directories(
     include
 )
 
-
 target_link_libraries(
     LumenTerrainEngine
-    Vulkan::Vulkan
+    OpenCL::OpenCL
 )
 
 add_executable(LTE_Test

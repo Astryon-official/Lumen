@@ -16,4 +16,6 @@ void ProcessChunk(
     int z
 );
 
+long RunGPUBenchmark();
+
 }

@@ -1,9 +1,8 @@
 package com.astryon.lte.chunk;
 
-import com.astryon.lte.terrain.TerrainProcessor;
 import com.astryon.lte.core.LTEStats;
 import com.astryon.lte.compute.LumenChunkComputeData;
-import com.astryon.lte.gpu.LTENative;
+import com.astryon.lte.generation.LTETerrainGenerator;
 
 public class ChunkProcessor {
 
@@ -19,6 +18,7 @@ public class ChunkProcessor {
 
             ChunkTask task = ChunkQueue.getNextChunk();
 
+
             if (task == null) {
                 break;
             }
@@ -26,72 +26,50 @@ public class ChunkProcessor {
 
             System.out.println(
                 "[LTE] Preparing chunk: "
-                + task.x + ", " + task.z
+                + task.x
+                + ", "
+                + task.z
             );
 
-
-            // CPU TERRAIN PREPARATION
 
             task.state = ChunkState.PREPARING_CPU;
 
 
             System.out.println(
                 "[LTE] CPU preparation started: "
-                + task.x + ", " + task.z
+                + task.x
+                + ", "
+                + task.z
             );
 
 
-	LumenChunkComputeData computeData =
-        	new LumenChunkComputeData(task.data);
-
-	TerrainProcessor.prepare(computeData);
+            LumenChunkComputeData computeData =
+                    new LumenChunkComputeData(task.data);
 
 
-	// GPU PROCESSING STAGE
+		LTETerrainGenerator.generate(computeData);
 
-	task.state = ChunkState.PROCESSING_GPU;
+	// COMPLETE
 
-
-	System.out.println(
-	    "[LTE] GPU processing started: "
-	    + task.x + ", " + task.z
-	);
+	task.state = ChunkState.COMPLETE;
 
 
-	try {
-
-	    LTENative.gpuProcessChunk(
-	        task.x,
-	        task.z
-	    );
-
-	} catch (Throwable e) {
-
-	    System.out.println(
-	        "[LTE] GPU processing failed: "
-	        + e.getMessage()
-	    );
-
-	}
+	ProcessingChunkCache.remove(task.x, task.z);
 
 
-	task.data.gpuProcessed = true;
+	CompletedChunkCache.markCompleted(task.x, task.z);
 
 
-            // COMPLETE
-
-            task.state = ChunkState.COMPLETE;
-
-
-            CompletedChunkCache.markCompleted(task.x, task.z);
-
-            LTEStats.chunkCompleted();
+	LTEStats.chunkCompleted();
 
 
             System.out.println(
                 "[LTE] Chunk completed: "
-                + task.x + ", " + task.z
+                + task.x
+                + ", "
+                + task.z
             );
+
 
 
             try {
