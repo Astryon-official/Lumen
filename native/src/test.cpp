@@ -1,150 +1,117 @@
 #include "HardwareManager.h"
 #include "Logger.h"
-#include "BenchmarkManager.h"
-#include "OpenCLManager.h"
-#include "OpenCLCompute.h"
 
 #include <iostream>
 
-
 int main()
 {
-    std::cout
-        << "========================================\n"
-        << " Lumen Terrain Engine Native GPU Test\n"
-        << "========================================\n";
-
-
-    /*
-     * Hardware detection
-     */
+    std::cout << "=== Lumen Terrain Engine Hardware Test ===\n\n";
 
     LTE::HardwareManager hardware;
 
-
     if (!hardware.Initialize())
     {
-        LTE::Log(
-            "Hardware initialization failed"
-        );
-
+        std::cerr << "Hardware initialization failed.\n";
         return 1;
     }
 
+    std::cout << "\n=== CPU Topology ===\n";
 
-    auto cpu =
-        hardware.GetCPU();
+    const auto& cpus = hardware.GetCPUs();
 
-
-    std::cout
-        << "\nCPU: "
-        << cpu.name
-        << "\nCores: "
-        << cpu.cores
-        << "\n";
-
-
-    auto gpus =
-        hardware.GetGPUs();
-
-
-    for (auto& gpu : gpus)
+    for (const auto& cpu : cpus)
     {
         std::cout
-            << "\nGPU: "
-            << gpu.name
-            << "\nVulkan: "
-            << gpu.vulkanSupported
+            << "CPU Package: "
+            << cpu.packageId
             << "\n";
-    }
 
-
-    /*
-     * Initialize OpenCL
-     */
-
-    std::cout
-        << "\n[LTE] Initializing OpenCL...\n";
-
-
-    if (!LTE::OpenCLManager::Initialize())
-    {
         std::cout
-            << "[LTE] OpenCL initialization FAILED\n";
+            << "Name: "
+            << cpu.name
+            << "\n";
 
-        return 1;
+        std::cout
+            << "Physical cores: "
+            << cpu.physicalCores
+            << "\n";
+
+        std::cout
+            << "Logical threads: "
+            << cpu.logicalThreads
+            << "\n";
+
+        for (const auto& core : cpu.cores)
+        {
+            std::cout
+                << "  Core "
+                << core.coreId
+                << ": ";
+
+            for (const auto& thread : core.threads)
+            {
+                std::cout
+                    << thread.logicalThread
+                    << " ";
+            }
+
+            std::cout << "\n";
+        }
+
+        std::cout << "\n";
     }
 
+    std::cout
+        << "Total physical cores: "
+        << hardware.GetTotalPhysicalCores()
+        << "\n";
 
     std::cout
-        << "[LTE] OpenCL initialized\n";
-
-
-    std::cout
-        << "[LTE] OpenCL Device: "
-        << LTE::OpenCLManager::GetDeviceName()
+        << "Total logical threads: "
+        << hardware.GetTotalLogicalThreads()
         << "\n";
 
 
-    /*
-     * GPU benchmark
-     */
+    std::cout << "\n=== GPUs ===\n";
 
-    std::cout
-        << "\n========================================\n"
-        << " GPU Benchmark\n"
-        << "========================================\n";
+    const auto& gpus = hardware.GetGPUs();
 
-
-    long score =
-        LTE::OpenCLManager::RunBenchmark();
-
-
-    std::cout
-        << "[LTE] GPU Score: "
-        << score
-        << "\n";
-
-
-    /*
-     * GPU terrain generation test
-     */
-
-    std::cout
-        << "\n========================================\n"
-        << " GPU Terrain Generation Test\n"
-        << "========================================\n";
-
-
-    bool result =
-        LTE::OpenCLCompute::ProcessChunk(
-            0,
-            0
-        );
-
-
-    if (result)
+    for (const auto& gpu : gpus)
     {
         std::cout
-            << "[LTE] GPU TERRAIN TEST SUCCESS\n";
-    }
-    else
-    {
+            << "GPU: "
+            << gpu.name
+            << "\n";
+
         std::cout
-            << "[LTE] GPU TERRAIN TEST FAILED\n";
+            << "OpenCL: "
+            << (gpu.openclSupported ? "yes" : "no")
+            << "\n";
+
+        std::cout
+            << "Vulkan: "
+            << (gpu.vulkanSupported ? "yes" : "no")
+            << "\n";
+
+        std::cout
+            << "Integrated: "
+            << (gpu.integrated ? "yes" : "no")
+            << "\n";
+
+        std::cout
+            << "Compute units: "
+            << gpu.computeUnits
+            << "\n";
+
+        std::cout
+            << "Global memory: "
+            << gpu.globalMemory
+            << " bytes\n";
+
+        std::cout << "\n";
     }
 
+    std::cout << "Hardware test complete.\n";
 
-    /*
-     * Shutdown OpenCL
-     */
-
-    LTE::OpenCLManager::Shutdown();
-
-
-    std::cout
-        << "\n[LTE] Test complete\n";
-
-
-    return result ? 0 : 1;
+    return 0;
 }

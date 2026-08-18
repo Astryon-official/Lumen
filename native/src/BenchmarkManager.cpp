@@ -53,7 +53,9 @@ void BenchmarkManager::Run(HardwareManager& hardware)
 
 
     cpuResult.deviceName =
-        hardware.GetCPU().name;
+        hardware.GetCPUs().empty()
+            ? "Unknown CPU"
+            : hardware.GetCPUs().front().name;
 
 
     cpuResult.type =
