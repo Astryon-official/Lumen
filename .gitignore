@@ -35,3 +35,4 @@ backup/
 # Fabric development server
 run/
 eula.txt
+.cptr/
